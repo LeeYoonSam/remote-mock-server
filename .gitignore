@@ -1,0 +1,7 @@
+.omc
+__pycache__/
+
+# 회사 API 데이터 — 로컬에서만 보관하고 저장소에는 올리지 않는다.
+# 새로 clone 한 경우 routes.example.json 을 복사해서 시작한다.
+routes.json
+routes.json.tmp

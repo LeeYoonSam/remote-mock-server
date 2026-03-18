@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mock Server - Route Manager</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #333; padding: 24px; }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #888; margin-bottom: 16px; }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  .server-info { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .info-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: #e5e7eb; border-radius: 6px; font-size: 12px; color: #555; cursor: pointer; font-family: monospace; }
+  .info-chip:hover { background: #dbeafe; color: #1e40af; }
+  .info-chip strong { color: #333; }
+  .toolbar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+  .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; }
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-danger { background: #ef4444; color: #fff; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-secondary { background: #e5e7eb; color: #333; }
+  .btn-secondary:hover { background: #d1d5db; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  .route-card { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .route-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
+  .route-path-group { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+  .route-path { font-family: monospace; font-size: 14px; font-weight: 600; color: #2563eb; word-break: break-all; text-decoration: none; }
+  .route-path:hover { text-decoration: underline; }
+  .route-actions { display: flex; gap: 4px; flex-shrink: 0; margin-left: 12px; }
+  .route-meta { display: flex; gap: 6px; margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; font-family: monospace; }
+  .badge-method { background: #dbeafe; color: #1e40af; }
+  .badge-status { background: #d1fae5; color: #065f46; cursor: pointer; transition: all 0.15s; }
+  .badge-status.error { background: #fee2e2; color: #991b1b; }
+  .badge-status.active { outline: 2px solid #2563eb; outline-offset: 1px; }
+  .badge-status.inactive { opacity: 0.5; }
+  .badge-status.inactive:hover { opacity: 0.8; }
+  .badge-delay { background: #fef3c7; color: #92400e; }
+  .route-response { font-family: monospace; font-size: 12px; background: #f8f9fa; padding: 8px 12px; border-radius: 4px; white-space: pre-wrap; word-break: break-all; max-height: 120px; overflow-y: auto; color: #555; }
+
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 100; justify-content: center; align-items: center; }
+  .modal-overlay.active { display: flex; }
+  .modal { background: #fff; border-radius: 12px; padding: 24px; width: 700px; max-width: 90vw; max-height: 85vh; overflow-y: auto; }
+  .modal h2 { font-size: 18px; margin-bottom: 16px; }
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #555; }
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;
+    font-family: monospace; font-size: 13px;
+  }
+  .form-group select {
+    padding-right: 40px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+  }
+  .form-group textarea { height: 150px; resize: vertical; }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
+  .form-row { display: flex; gap: 12px; }
+  .form-row .form-group { flex: 1; }
+  .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .error-msg { color: #ef4444; font-size: 12px; margin-top: 4px; display: none; }
+  .empty-state { text-align: center; color: #999; padding: 40px; }
+
+  .status { position: fixed; bottom: 20px; right: 20px; padding: 10px 16px; border-radius: 8px; font-size: 13px; display: none; z-index: 200; }
+  .status.success { background: #10b981; color: #fff; display: block; }
+  .status.error { background: #ef4444; color: #fff; display: block; }
+
+  /* 상태별 응답 탭 */
+  .response-tabs { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; align-items: center; }
+  .response-tab { padding: 4px 12px; border: 1px solid #d1d5db; border-radius: 6px 6px 0 0; cursor: pointer; font-size: 12px; font-weight: 600; font-family: monospace; background: #f5f5f5; color: #666; display: flex; align-items: center; gap: 4px; }
+  .response-tab.active { background: #fff; border-bottom-color: #fff; color: #2563eb; }
+  .response-tab .tab-close { font-size: 14px; color: #999; cursor: pointer; margin-left: 2px; line-height: 1; }
+  .response-tab .tab-close:hover { color: #ef4444; }
+  .response-tab-add { padding: 4px 10px; border: 1px dashed #d1d5db; border-radius: 6px 6px 0 0; cursor: pointer; font-size: 12px; color: #999; background: transparent; }
+  .response-tab-add:hover { border-color: #2563eb; color: #2563eb; }
+  .response-panel { border: 1px solid #d1d5db; border-radius: 0 6px 6px 6px; padding: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Mock Server - Route Manager</h1>
+  <p class="subtitle">routes.json 파일을 직접 관리합니다. 변경사항은 즉시 반영됩니다.</p>
+  <div class="server-info">
+    <span class="info-chip" onclick="copyText(location.hostname)" title="클릭하여 복사">Host: <strong id="info-host"></strong></span>
+    <span class="info-chip" onclick="copyText(location.port)" title="클릭하여 복사">Port: <strong id="info-port"></strong></span>
+    <span class="info-chip" onclick="copyText(location.origin)" title="클릭하여 복사">Origin: <strong id="info-origin"></strong></span>
+  </div>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="openAddModal()">+ Route 추가</button>
+    <button class="btn btn-secondary" onclick="loadRoutes()">새로고침</button>
+  </div>
+  <div id="route-list"></div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2 id="modal-title">Route 추가</h2>
+    <div class="form-group">
+      <label>Path</label>
+      <input type="text" id="input-path" placeholder="/api/example/sample">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>HTTP Method</label>
+        <select id="input-method">
+          <option value="GET">GET</option>
+          <option value="POST">POST</option>
+          <option value="PUT">PUT</option>
+          <option value="DELETE">DELETE</option>
+          <option value="PATCH">PATCH</option>
+          <option value="ALL">ALL</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Delay (ms)</label>
+        <input type="number" id="input-delay" value="0" min="0" step="100">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>상태별 응답</label>
+      <div class="response-tabs" id="response-tabs"></div>
+      <div class="response-panel">
+        <textarea id="input-response" placeholder='{"key": "value"}'></textarea>
+        <div class="error-msg" id="json-error">JSON 형식이 올바르지 않습니다.</div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveRoute()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="status" id="status"></div>
+
+<script>
+const API = '/_api/routes';
+let routes = {};
+let editingPath = null;
+
+// 모달 내 상태별 응답 관리
+let modalResponses = {}; // { "200": {...}, "400": {...} }
+let modalActiveTab = null;
+
+const STATUS_LABELS = {
+  '200': '200 OK', '201': '201 Created', '204': '204 No Content',
+  '400': '400 Bad Request', '401': '401 Unauthorized', '403': '403 Forbidden',
+  '404': '404 Not Found', '500': '500 Server Error'
+};
+
+function parseRouteFull(routeData) {
+  if (routeData && typeof routeData === 'object' && '__mock_config__' in routeData) {
+    const config = routeData.__mock_config__;
+    // 새 포맷: 복수 responses
+    if ('__mock_responses__' in routeData) {
+      return { config, responses: routeData.__mock_responses__ };
+    }
+    // 기존 포맷: 단수 response → 복수 변환
+    const status = String(config.status || 200);
+    const response = routeData.__mock_response__ || {};
+    return { config, responses: { [status]: response } };
+  }
+  // 레거시 포맷
+  return {
+    config: { method: 'ALL', delay: 0, active_status: 200 },
+    responses: { '200': routeData }
+  };
+}
+
+function getActiveResponse(config, responses) {
+  const active = String(config.active_status || config.status || 200);
+  const keys = Object.keys(responses);
+  if (responses[active]) return { status: active, response: responses[active] };
+  if (responses['200']) return { status: '200', response: responses['200'] };
+  if (keys.length > 0) return { status: keys[0], response: responses[keys[0]] };
+  return { status: '200', response: {} };
+}
+
+async function loadRoutes() {
+  try {
+    const res = await fetch(API);
+    routes = await res.json();
+    renderRoutes();
+  } catch (e) {
+    document.getElementById('route-list').innerHTML =
+      '<div class="empty-state">서버에 연결할 수 없습니다.<br><code>python3 server.py</code>로 서버를 먼저 실행하세요.</div>';
+  }
+}
+
+function renderRoutes() {
+  const list = document.getElementById('route-list');
+  const entries = Object.entries(routes);
+  if (entries.length === 0) {
+    list.innerHTML = '<div class="empty-state">등록된 route가 없습니다.</div>';
+    return;
+  }
+  list.innerHTML = entries.map(([path, routeData]) => {
+    const { config, responses } = parseRouteFull(routeData);
+    const method = config.method || 'ALL';
+    const delay = config.delay || 0;
+    const { status: activeStatus, response: activeResponse } = getActiveResponse(config, responses);
+    const statusKeys = Object.keys(responses);
+
+    const statusBadges = statusKeys.map(s => {
+      const isActive = s === activeStatus;
+      const isError = parseInt(s) >= 400;
+      const cls = `badge badge-status${isError ? ' error' : ''}${isActive ? ' active' : ' inactive'}`;
+      return `<span class="${cls}" onclick="switchActiveStatus('${escapeAttr(path)}', '${s}')" title="${isActive ? '활성' : '클릭하여 활성화'}">${s}</span>`;
+    }).join('');
+
+    return `
+    <div class="route-card">
+      <div class="route-header">
+        <div class="route-path-group">
+          <a class="route-path" href="${escapeAttr(path)}?_preview=1" target="_blank">${escapeHtml(path)} ↗</a>
+          <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); copyText('${escapeAttr(path)}')">Copy</button>
+        </div>
+        <div class="route-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openEditModal('${escapeAttr(path)}')">수정</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRoute('${escapeAttr(path)}')">삭제</button>
+        </div>
+      </div>
+      <div class="route-meta">
+        <span class="badge badge-method">${method}</span>
+        ${statusBadges}
+        ${delay > 0 ? `<span class="badge badge-delay">${delay}ms</span>` : ''}
+      </div>
+      <div class="route-response">${escapeHtml(JSON.stringify(activeResponse, null, 2))}</div>
+    </div>
+  `;
+  }).join('');
+}
+
+async function switchActiveStatus(path, newStatus) {
+  const routeData = routes[path];
+  const { config, responses } = parseRouteFull(routeData);
+  config.active_status = parseInt(newStatus);
+
+  const body = { path, responses, config: { method: config.method || 'ALL', delay: config.delay || 0, active_status: parseInt(newStatus) } };
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) {
+      await loadRoutes();
+      showStatus(`활성 상태: ${newStatus}`);
+    }
+  } catch (e) {
+    showStatus('변경 실패', true);
+  }
+}
+
+// --- 모달 탭 관리 ---
+
+function renderModalTabs() {
+  const tabsEl = document.getElementById('response-tabs');
+  const keys = Object.keys(modalResponses);
+  tabsEl.innerHTML = keys.map(s => {
+    const isActive = s === modalActiveTab;
+    const label = STATUS_LABELS[s] || s;
+    return `<div class="response-tab${isActive ? ' active' : ''}" onclick="switchModalTab('${s}')">
+      ${label}
+      ${keys.length > 1 ? `<span class="tab-close" onclick="event.stopPropagation(); removeModalTab('${s}')">×</span>` : ''}
+    </div>`;
+  }).join('') + `<button class="response-tab-add" onclick="addModalTab()">+ 상태 추가</button>`;
+}
+
+function switchModalTab(status) {
+  // 현재 탭 내용 저장
+  saveCurrentTabContent();
+  // 탭 전환
+  modalActiveTab = status;
+  renderModalTabs();
+  loadTabContent(status);
+}
+
+function saveCurrentTabContent() {
+  if (!modalActiveTab) return;
+  const responseText = document.getElementById('input-response').value.trim();
+  try {
+    modalResponses[modalActiveTab] = JSON.parse(responseText);
+  } catch (e) {
+    modalResponses[modalActiveTab] = responseText;
+  }
+}
+
+function loadTabContent(status) {
+  const data = modalResponses[status];
+  if (typeof data === 'string') {
+    document.getElementById('input-response').value = data;
+  } else {
+    document.getElementById('input-response').value = JSON.stringify(data, null, 2);
+  }
+  document.getElementById('json-error').style.display = 'none';
+}
+
+function addModalTab() {
+  saveCurrentTabContent();
+  const allCodes = ['200', '201', '204', '400', '401', '403', '404', '500'];
+  const used = Object.keys(modalResponses);
+  const available = allCodes.filter(c => !used.includes(c));
+  if (available.length === 0) {
+    showStatus('추가 가능한 상태 코드가 없습니다', true);
+    return;
+  }
+  const labels = available.map(c => STATUS_LABELS[c] || c);
+  const chosen = prompt('추가할 상태 코드를 선택하세요:\n' + available.map((c, i) => `${i + 1}. ${labels[i]}`).join('\n') + '\n\n번호를 입력하세요:');
+  if (!chosen) return;
+  const idx = parseInt(chosen) - 1;
+  const newCode = (idx >= 0 && idx < available.length) ? available[idx] : available[0];
+
+  modalResponses[newCode] = {};
+  modalActiveTab = newCode;
+  renderModalTabs();
+  loadTabContent(newCode);
+  document.getElementById('input-response').value = '{\n  \n}';
+}
+
+function removeModalTab(status) {
+  if (Object.keys(modalResponses).length <= 1) return;
+  delete modalResponses[status];
+  const remaining = Object.keys(modalResponses);
+  modalActiveTab = remaining[0];
+  renderModalTabs();
+  loadTabContent(modalActiveTab);
+}
+
+function openAddModal() {
+  editingPath = null;
+  document.getElementById('modal-title').textContent = 'Route 추가';
+  document.getElementById('input-path').value = '';
+  document.getElementById('input-path').disabled = false;
+  document.getElementById('input-method').value = 'ALL';
+  document.getElementById('input-delay').value = '0';
+
+  modalResponses = { '200': {} };
+  modalActiveTab = '200';
+  renderModalTabs();
+  loadTabContent('200');
+  document.getElementById('input-response').value = '{\n  \n}';
+
+  document.getElementById('json-error').style.display = 'none';
+  document.getElementById('modal').classList.add('active');
+  document.getElementById('input-path').focus();
+}
+
+function openEditModal(path) {
+  editingPath = path;
+  const { config, responses } = parseRouteFull(routes[path]);
+
+  document.getElementById('modal-title').textContent = 'Route 수정';
+  document.getElementById('input-path').value = path;
+  document.getElementById('input-path').disabled = true;
+  document.getElementById('input-method').value = config.method || 'GET';
+  document.getElementById('input-delay').value = config.delay || 0;
+
+  modalResponses = JSON.parse(JSON.stringify(responses)); // deep copy
+  const { status: activeStatus } = getActiveResponse(config, responses);
+  modalActiveTab = activeStatus;
+  renderModalTabs();
+  loadTabContent(modalActiveTab);
+
+  document.getElementById('json-error').style.display = 'none';
+  document.getElementById('modal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+async function saveRoute() {
+  try {
+    saveCurrentTabContent();
+
+    const path = document.getElementById('input-path').value.trim();
+    const method = document.getElementById('input-method').value;
+    const delay = parseInt(document.getElementById('input-delay').value) || 0;
+
+    if (!path) { document.getElementById('input-path').focus(); return; }
+
+    // 모든 응답이 유효한 JSON인지 검증
+    const validatedResponses = {};
+    for (const [status, data] of Object.entries(modalResponses)) {
+      if (typeof data === 'string') {
+        try {
+          validatedResponses[status] = JSON.parse(data);
+        } catch (e) {
+          modalActiveTab = status;
+          renderModalTabs();
+          loadTabContent(status);
+          const errEl = document.getElementById('json-error');
+          errEl.style.display = 'block';
+          errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+      } else {
+        validatedResponses[status] = data;
+      }
+    }
+
+    document.getElementById('json-error').style.display = 'none';
+
+    const activeStatus = parseInt(modalActiveTab) || 200;
+    const config = { method, delay, active_status: activeStatus };
+    const body = { path, responses: validatedResponses, config };
+
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) {
+      closeModal();
+      await loadRoutes();
+      showStatus(editingPath ? '수정 완료' : '추가 완료');
+    } else {
+      const err = await res.json().catch(() => ({}));
+      showStatus(err.error || '저장 실패', true);
+    }
+  } catch (e) {
+    console.error('[saveRoute]', e);
+    showStatus('저장 실패: ' + e.message, true);
+  }
+}
+
+async function deleteRoute(path) {
+  if (!confirm(`"${path}" route를 삭제하시겠습니까?`)) return;
+  try {
+    const res = await fetch(API, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path })
+    });
+    if (res.ok) {
+      await loadRoutes();
+      showStatus('삭제 완료');
+    }
+  } catch (e) {
+    showStatus('삭제 실패', true);
+  }
+}
+
+function showStatus(msg, isError = false) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + (isError ? 'error' : 'success');
+  setTimeout(() => { el.className = 'status'; }, 2000);
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showStatus('복사 완료: ' + text);
+  }).catch(() => {
+    showStatus('복사 실패', true);
+  });
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escapeAttr(str) {
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+document.getElementById('info-host').textContent = location.hostname;
+document.getElementById('info-port').textContent = location.port;
+document.getElementById('info-origin').textContent = location.origin;
+loadRoutes();
+</script>
+</body>
+</html>
