@@ -15,7 +15,12 @@
   .info-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: #e5e7eb; border-radius: 6px; font-size: 12px; color: #555; cursor: pointer; font-family: monospace; }
   .info-chip:hover { background: #dbeafe; color: #1e40af; }
   .info-chip strong { color: #333; }
-  .toolbar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+  .toolbar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+  .filter-bar input[type="search"] { flex: 1; min-width: 200px; padding: 9px 12px 9px 34px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 11px center; background-size: 15px; }
+  .filter-bar select { padding: 9px 32px 9px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; appearance: none; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 11px center; background-size: 11px; }
+  .filter-bar input:focus, .filter-bar select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+  .filter-count { font-size: 12px; color: #6b7280; margin-left: auto; white-space: nowrap; background: #f3f4f6; padding: 6px 12px; border-radius: 999px; }
   .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; }
   .btn-primary { background: #2563eb; color: #fff; }
   .btn-primary:hover { background: #1d4ed8; }
@@ -40,11 +45,12 @@
   .badge-status.inactive { opacity: 0.5; }
   .badge-status.inactive:hover { opacity: 0.8; }
   .badge-delay { background: #fef3c7; color: #92400e; }
+  .badge-domain { background: #ede9fe; color: #5b21b6; }
   .route-response { font-family: monospace; font-size: 12px; background: #f8f9fa; padding: 8px 12px; border-radius: 4px; white-space: pre-wrap; word-break: break-all; max-height: 120px; overflow-y: auto; color: #555; }
 
   .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 100; justify-content: center; align-items: center; }
   .modal-overlay.active { display: flex; }
-  .modal { background: #fff; border-radius: 12px; padding: 24px; width: 700px; max-width: 90vw; max-height: 85vh; overflow-y: auto; }
+  .modal { background: #fff; border-radius: 12px; padding: 24px; width: 760px; max-width: 92vw; max-height: 88vh; overflow-y: auto; }
   .modal h2 { font-size: 18px; margin-bottom: 16px; }
   .form-group { margin-bottom: 12px; }
   .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #555; }
@@ -62,7 +68,7 @@
     background-position: right 12px center;
     background-size: 12px;
   }
-  .form-group textarea { height: 150px; resize: vertical; }
+  .form-group textarea { height: 340px; resize: vertical; line-height: 1.5; white-space: pre; }
   .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
   .form-row { display: flex; gap: 12px; }
   .form-row .form-group { flex: 1; }
@@ -83,6 +89,30 @@
   .response-tab-add { padding: 4px 10px; border: 1px dashed #d1d5db; border-radius: 6px 6px 0 0; cursor: pointer; font-size: 12px; color: #999; background: transparent; }
   .response-tab-add:hover { border-color: #2563eb; color: #2563eb; }
   .response-panel { border: 1px solid #d1d5db; border-radius: 0 6px 6px 6px; padding: 12px; }
+  .panel-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .panel-toolbar .toolbar-btns { display: flex; gap: 6px; flex-shrink: 0; }
+  .resp-meta { display: flex; gap: 6px; align-items: center; flex: 1 1 320px; min-width: 220px; }
+  .resp-meta select { flex: 0 0 80px; width: 80px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 12px; font-family: monospace; background: #fff; }
+  .resp-meta input { flex: 1 1 auto; min-width: 120px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 12px; }
+  .resp-meta input:focus, .resp-meta select:focus { outline: none; border-color: #2563eb; }
+  .response-tab .tab-active-mark { color: #f59e0b; }
+  .panel-hint { font-size: 11px; color: #aaa; font-family: monospace; }
+
+  .response-body { display: flex; gap: 8px; align-items: stretch; }
+  .response-body textarea { flex: 1; min-width: 0; }
+  .json-tree { display: none; width: 230px; flex-shrink: 0; max-height: 340px; overflow: auto; border: 1px solid #e5e7eb; border-radius: 6px; padding: 6px; background: #fafafa; font-family: monospace; font-size: 12px; }
+  .json-tree.active { display: block; }
+  .json-tree-empty { color: #aaa; padding: 8px; font-size: 11px; }
+  .json-tree-item { padding: 2px 6px; border-radius: 4px; cursor: pointer; white-space: nowrap; color: #444; }
+  .json-tree-item:hover { background: #dbeafe; color: #1e40af; }
+  .json-tree-item .jt-arrow { display: inline-block; width: 12px; text-align: center; color: #9ca3af; }
+  .json-tree-item .jt-kind { color: #bbb; margin-left: 4px; }
+  .btn.toggle-on { background: #2563eb; color: #fff; }
+
+  .route-title { font-size: 15px; font-weight: 700; color: #111; line-height: 1.3; }
+  .route-title-stack { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+  .route-desc { font-size: 12px; color: #888; line-height: 1.4; word-break: break-word; }
+  .field-hint { font-weight: 400; color: #aaa; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -98,6 +128,12 @@
     <button class="btn btn-primary" onclick="openAddModal()">+ Route 추가</button>
     <button class="btn btn-secondary" onclick="loadRoutes()">새로고침</button>
   </div>
+  <div class="filter-bar">
+    <input type="search" id="filter-text" placeholder="이름·경로·설명 검색" oninput="renderRoutes()">
+    <select id="filter-name" onchange="renderRoutes()"><option value="">전체 이름</option></select>
+    <select id="filter-domain" onchange="renderRoutes()"><option value="">전체 도메인</option></select>
+    <span class="filter-count" id="filter-count"></span>
+  </div>
   <div id="route-list"></div>
 </div>
 
@@ -105,8 +141,22 @@
   <div class="modal">
     <h2 id="modal-title">Route 추가</h2>
     <div class="form-group">
+      <label>이름 <span class="field-hint">(식별용 · 같은 이름으로 묶으면 필터에서 그룹처럼 사용, 선택)</span></label>
+      <input type="text" id="input-title" list="name-list" placeholder="예: 사용자 목록 조회">
+    </div>
+    <datalist id="name-list"></datalist>
+    <div class="form-group">
+      <label>설명 <span class="field-hint">(선택)</span></label>
+      <input type="text" id="input-description" placeholder="예: 마이페이지 상단 사용자 정보 영역">
+    </div>
+    <div class="form-group">
+      <label>도메인 <span class="field-hint">(분류·필터용 · 비우면 Path에서 자동 추출)</span></label>
+      <input type="text" id="input-domain" list="domain-list" placeholder="예: trial-campaign">
+    </div>
+    <datalist id="domain-list"></datalist>
+    <div class="form-group">
       <label>Path</label>
-      <input type="text" id="input-path" placeholder="/api/example/sample">
+      <input type="text" id="input-path" placeholder="/api/example/sample" onblur="maybeGuessDomain()">
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -126,10 +176,33 @@
       </div>
     </div>
     <div class="form-group">
-      <label>상태별 응답</label>
+      <label>상태별 응답 <span class="field-hint">(같은 상태코드도 여러 개 추가해 케이스별로 대비 가능)</span></label>
       <div class="response-tabs" id="response-tabs"></div>
       <div class="response-panel">
-        <textarea id="input-response" placeholder='{"key": "value"}'></textarea>
+        <div class="panel-toolbar">
+          <div class="resp-meta">
+            <select id="input-resp-status" onchange="onRespMetaChange()">
+              <option value="200">200</option>
+              <option value="201">201</option>
+              <option value="204">204</option>
+              <option value="400">400</option>
+              <option value="401">401</option>
+              <option value="403">403</option>
+              <option value="404">404</option>
+              <option value="500">500</option>
+            </select>
+            <input type="text" id="input-resp-label" placeholder="이 응답 설명 (예: 빈 목록, VIP 사용자)" oninput="onRespMetaChange()">
+          </div>
+          <div class="toolbar-btns">
+            <button type="button" id="btn-set-active" class="btn btn-secondary btn-sm" onclick="setActiveResponse()">☆ 활성으로</button>
+            <button type="button" id="btn-tree" class="btn btn-secondary btn-sm" onclick="toggleJsonTree()">⌗ 트리</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="formatResponse()">⤵ 정렬</button>
+          </div>
+        </div>
+        <div class="response-body">
+          <div class="json-tree" id="json-tree"></div>
+          <textarea id="input-response" wrap="off" placeholder='{"key": "value"}'></textarea>
+        </div>
         <div class="error-msg" id="json-error">JSON 형식이 올바르지 않습니다.</div>
       </div>
     </div>
@@ -146,10 +219,15 @@
 const API = '/_api/routes';
 let routes = {};
 let editingPath = null;
+let jsonTreeVisible = false;
+let jsonTreeRoot = null;
+let jsonTreeNodes = [];
 
-// 모달 내 상태별 응답 관리
-let modalResponses = {}; // { "200": {...}, "400": {...} }
-let modalActiveTab = null;
+// 모달 내 상태별 응답 관리 (응답 = 케이스 목록; 같은 상태코드도 여러 개 가능)
+let modalItems = [];              // [{id, status, label, body}]
+let modalActiveId = null;         // 편집 중인 탭 id
+let modalActiveResponseId = null; // 활성으로 지정된 응답 id
+let respIdSeq = 0;
 
 const STATUS_LABELS = {
   '200': '200 OK', '201': '201 Created', '204': '204 No Content',
@@ -157,38 +235,59 @@ const STATUS_LABELS = {
   '404': '404 Not Found', '500': '500 Server Error'
 };
 
-function parseRouteFull(routeData) {
-  if (routeData && typeof routeData === 'object' && '__mock_config__' in routeData) {
-    const config = routeData.__mock_config__;
-    // 새 포맷: 복수 responses
-    if ('__mock_responses__' in routeData) {
-      return { config, responses: routeData.__mock_responses__ };
-    }
-    // 기존 포맷: 단수 response → 복수 변환
-    const status = String(config.status || 200);
-    const response = routeData.__mock_response__ || {};
-    return { config, responses: { [status]: response } };
-  }
-  // 레거시 포맷
-  return {
-    config: { method: 'ALL', delay: 0, active_status: 200 },
-    responses: { '200': routeData }
-  };
+function newRespId() {
+  return 'r' + (respIdSeq++) + '_' + Math.floor(performance.now()).toString(36);
 }
 
-function getActiveResponse(config, responses) {
-  const active = String(config.active_status || config.status || 200);
-  const keys = Object.keys(responses);
-  if (responses[active]) return { status: active, response: responses[active] };
-  if (responses['200']) return { status: '200', response: responses['200'] };
-  if (keys.length > 0) return { status: keys[0], response: responses[keys[0]] };
-  return { status: '200', response: {} };
+// route 데이터를 { config, items } 로 정규화. 하위 호환(배열/dict/단수/레거시) 지원.
+function toItems(routeData) {
+  if (routeData && typeof routeData === 'object' && '__mock_config__' in routeData) {
+    const config = routeData.__mock_config__;
+    if ('__mock_responses__' in routeData) {
+      const resp = routeData.__mock_responses__;
+      if (Array.isArray(resp)) {
+        return { config, items: resp.map(r => ({
+          id: String(r.id != null ? r.id : r.status),
+          status: parseInt(r.status) || 200,
+          label: r.label || '',
+          body: r.body !== undefined ? r.body : {}
+        })) };
+      }
+      // 기존 dict { status: body }
+      return { config, items: Object.entries(resp).map(([k, v]) => ({
+        id: String(k), status: parseInt(k) || 200, label: '', body: v
+      })) };
+    }
+    if ('__mock_response__' in routeData) {
+      const st = parseInt(config.status) || 200;
+      return { config, items: [{ id: String(st), status: st, label: '', body: routeData.__mock_response__ }] };
+    }
+    return { config, items: [{ id: '200', status: 200, label: '', body: {} }] };
+  }
+  // 레거시 포맷
+  return { config: { method: 'ALL', delay: 0 }, items: [{ id: '200', status: 200, label: '', body: routeData }] };
+}
+
+// config 기준으로 활성 응답 항목을 고른다. (active_id → active_status → status → 첫 항목)
+function getActiveItem(config, items) {
+  if (!items.length) return { id: '200', status: 200, label: '', body: {} };
+  if (config.active_id != null) {
+    const f = items.find(it => it.id === String(config.active_id));
+    if (f) return f;
+  }
+  const ast = config.active_status != null ? config.active_status : config.status;
+  if (ast != null) {
+    const f = items.find(it => it.status === parseInt(ast));
+    if (f) return f;
+  }
+  return items[0];
 }
 
 async function loadRoutes() {
   try {
     const res = await fetch(API);
     routes = await res.json();
+    refreshFilterOptions();
     renderRoutes();
   } catch (e) {
     document.getElementById('route-list').innerHTML =
@@ -196,32 +295,118 @@ async function loadRoutes() {
   }
 }
 
+// path 에서 도메인 기본값을 추측 (api/버전/me 등 공통 세그먼트와 path 파라미터는 건너뜀)
+function guessDomain(path) {
+  if (!path) return '';
+  const clean = path.split('?')[0].split('#')[0];
+  const segs = clean.split('/').filter(s => s);
+  const skip = new Set(['api', 'me', 'mine', 'app', 'mobile', 'web']);
+  for (const s of segs) {
+    const low = s.toLowerCase();
+    if (/^v\d+$/.test(low)) continue;                     // 버전 세그먼트
+    if (skip.has(low)) continue;                          // 공통 prefix
+    if (s.startsWith('{') || s.startsWith('_')) continue; // path 파라미터
+    return s;
+  }
+  return ''; // 추측할 만한 세그먼트가 없으면 비워둔다 (사용자가 직접 입력)
+}
+
+// Path 입력 후 도메인이 비어 있으면 자동으로 채운다.
+function maybeGuessDomain() {
+  const domainEl = document.getElementById('input-domain');
+  if (domainEl.value.trim()) return;
+  const g = guessDomain(document.getElementById('input-path').value.trim());
+  if (g) domainEl.value = g;
+}
+
+// routes 전체에서 사용 중인 도메인·이름 목록 수집
+function getClassifications() {
+  const domains = new Set(), titles = new Set();
+  for (const rd of Object.values(routes)) {
+    const { config } = toItems(rd);
+    if (config.domain) domains.add(config.domain);
+    if (config.title) titles.add(config.title);
+  }
+  return { domains: [...domains].sort(), titles: [...titles].sort() };
+}
+
+// 필터 select 와 모달 입력 자동완성(datalist) 옵션을 최신 분류 목록으로 갱신
+function refreshFilterOptions() {
+  const { domains, titles } = getClassifications();
+  const fd = document.getElementById('filter-domain');
+  const fn = document.getElementById('filter-name');
+  const dv = fd.value, nv = fn.value;
+  fd.innerHTML = '<option value="">전체 도메인</option>' +
+    domains.map(d => `<option value="${escapeAttr(d)}">${escapeHtml(d)}</option>`).join('');
+  fn.innerHTML = '<option value="">전체 이름</option>' +
+    titles.map(t => `<option value="${escapeAttr(t)}">${escapeHtml(t)}</option>`).join('');
+  fd.value = domains.includes(dv) ? dv : '';   // 선택값이 사라졌으면 전체로 복귀
+  fn.value = titles.includes(nv) ? nv : '';
+  document.getElementById('domain-list').innerHTML = domains.map(d => `<option value="${escapeAttr(d)}"></option>`).join('');
+  document.getElementById('name-list').innerHTML = titles.map(t => `<option value="${escapeAttr(t)}"></option>`).join('');
+}
+
 function renderRoutes() {
   const list = document.getElementById('route-list');
-  const entries = Object.entries(routes);
+  const total = Object.keys(routes).length;
+  // 최신 등록순: routes.json 삽입 순서의 역순으로 표시 (마지막에 등록/수정된 것이 위로)
+  let entries = Object.entries(routes).reverse();
+
+  // 필터 적용 (이름 / 도메인 / 텍스트)
+  const ft = (document.getElementById('filter-text').value || '').toLowerCase().trim();
+  const fdv = document.getElementById('filter-domain').value;
+  const fnv = document.getElementById('filter-name').value;
+  entries = entries.filter(([path, rd]) => {
+    const { config } = toItems(rd);
+    if (fnv && (config.title || '') !== fnv) return false;
+    if (fdv && (config.domain || '') !== fdv) return false;
+    if (ft) {
+      const hay = (path + ' ' + (config.title || '') + ' ' + (config.description || '')).toLowerCase();
+      if (!hay.includes(ft)) return false;
+    }
+    return true;
+  });
+
+  const countEl = document.getElementById('filter-count');
+  if (countEl) countEl.textContent = (ft || fdv || fnv) ? `${entries.length} / ${total}` : `${total}개`;
+
   if (entries.length === 0) {
-    list.innerHTML = '<div class="empty-state">등록된 route가 없습니다.</div>';
+    list.innerHTML = total === 0
+      ? '<div class="empty-state">등록된 route가 없습니다.</div>'
+      : '<div class="empty-state">조건에 맞는 route가 없습니다.</div>';
     return;
   }
   list.innerHTML = entries.map(([path, routeData]) => {
-    const { config, responses } = parseRouteFull(routeData);
+    const { config, items } = toItems(routeData);
     const method = config.method || 'ALL';
     const delay = config.delay || 0;
-    const { status: activeStatus, response: activeResponse } = getActiveResponse(config, responses);
-    const statusKeys = Object.keys(responses);
+    const title = config.title || '';
+    const description = config.description || '';
+    const domain = config.domain || '';
+    const active = getActiveItem(config, items);
+    const activeResponse = active.body;
 
-    const statusBadges = statusKeys.map(s => {
-      const isActive = s === activeStatus;
-      const isError = parseInt(s) >= 400;
+    const statusBadges = items.map(it => {
+      const isActive = it.id === active.id;
+      const isError = it.status >= 400;
       const cls = `badge badge-status${isError ? ' error' : ''}${isActive ? ' active' : ' inactive'}`;
-      return `<span class="${cls}" onclick="switchActiveStatus('${escapeAttr(path)}', '${s}')" title="${isActive ? '활성' : '클릭하여 활성화'}">${s}</span>`;
+      const lbl = it.label ? `${it.status} · ${escapeHtml(it.label)}` : `${it.status}`;
+      return `<span class="${cls}" onclick="switchActiveResponse('${escapeAttr(path)}', '${escapeAttr(it.id)}')" title="${isActive ? '활성' : '클릭하여 활성화'}">${lbl}</span>`;
     }).join('');
+
+    const titleHtml = title ? `<div class="route-title">${escapeHtml(title)}</div>` : '';
+    const descHtml = description ? `<div class="route-desc">${escapeHtml(description)}</div>` : '';
+    const domainBadge = domain ? `<span class="badge badge-domain">${escapeHtml(domain)}</span>` : '';
 
     return `
     <div class="route-card">
       <div class="route-header">
         <div class="route-path-group">
-          <a class="route-path" href="${escapeAttr(path)}?_preview=1" target="_blank">${escapeHtml(path)} ↗</a>
+          <div class="route-title-stack">
+            ${titleHtml}
+            ${descHtml}
+            <a class="route-path" href="${escapeAttr(path)}?_preview=1" target="_blank">${escapeHtml(path)} ↗</a>
+          </div>
           <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); copyText('${escapeAttr(path)}')">Copy</button>
         </div>
         <div class="route-actions">
@@ -230,6 +415,7 @@ function renderRoutes() {
         </div>
       </div>
       <div class="route-meta">
+        ${domainBadge}
         <span class="badge badge-method">${method}</span>
         ${statusBadges}
         ${delay > 0 ? `<span class="badge badge-delay">${delay}ms</span>` : ''}
@@ -240,12 +426,13 @@ function renderRoutes() {
   }).join('');
 }
 
-async function switchActiveStatus(path, newStatus) {
-  const routeData = routes[path];
-  const { config, responses } = parseRouteFull(routeData);
-  config.active_status = parseInt(newStatus);
-
-  const body = { path, responses, config: { method: config.method || 'ALL', delay: config.delay || 0, active_status: parseInt(newStatus) } };
+async function switchActiveResponse(path, id) {
+  const { config, items } = toItems(routes[path]);
+  // config 의 나머지 필드(title/domain 등)는 보존하고 active_id 만 변경
+  const newConfig = { ...config, method: config.method || 'ALL', delay: config.delay || 0, active_id: id };
+  delete newConfig.active_status;
+  delete newConfig.status;
+  const body = { path, responses: items, config: newConfig };
   try {
     const res = await fetch(API, {
       method: 'POST',
@@ -254,7 +441,8 @@ async function switchActiveStatus(path, newStatus) {
     });
     if (res.ok) {
       await loadRoutes();
-      showStatus(`활성 상태: ${newStatus}`);
+      const it = items.find(x => x.id === id);
+      showStatus('활성 응답: ' + (it ? (it.label ? it.status + ' · ' + it.label : it.status) : id));
     }
   } catch (e) {
     showStatus('변경 실패', true);
@@ -263,93 +451,124 @@ async function switchActiveStatus(path, newStatus) {
 
 // --- 모달 탭 관리 ---
 
+function curItem() {
+  return modalItems.find(it => it.id === modalActiveId) || null;
+}
+
 function renderModalTabs() {
   const tabsEl = document.getElementById('response-tabs');
-  const keys = Object.keys(modalResponses);
-  tabsEl.innerHTML = keys.map(s => {
-    const isActive = s === modalActiveTab;
-    const label = STATUS_LABELS[s] || s;
-    return `<div class="response-tab${isActive ? ' active' : ''}" onclick="switchModalTab('${s}')">
-      ${label}
-      ${keys.length > 1 ? `<span class="tab-close" onclick="event.stopPropagation(); removeModalTab('${s}')">×</span>` : ''}
+  tabsEl.innerHTML = modalItems.map(it => {
+    const isEditing = it.id === modalActiveId;
+    const isActive = it.id === modalActiveResponseId;
+    const text = it.label ? `${it.status} · ${escapeHtml(it.label)}` : (STATUS_LABELS[String(it.status)] || String(it.status));
+    const star = isActive ? '<span class="tab-active-mark" title="활성 응답">★</span> ' : '';
+    return `<div class="response-tab${isEditing ? ' active' : ''}" onclick="switchModalTab('${escapeAttr(it.id)}')">
+      ${star}${text}
+      ${modalItems.length > 1 ? `<span class="tab-close" onclick="event.stopPropagation(); removeModalTab('${escapeAttr(it.id)}')">×</span>` : ''}
     </div>`;
   }).join('') + `<button class="response-tab-add" onclick="addModalTab()">+ 상태 추가</button>`;
 }
 
-function switchModalTab(status) {
-  // 현재 탭 내용 저장
+function switchModalTab(id) {
   saveCurrentTabContent();
-  // 탭 전환
-  modalActiveTab = status;
+  modalActiveId = id;
   renderModalTabs();
-  loadTabContent(status);
+  loadTabContent(id);
 }
 
 function saveCurrentTabContent() {
-  if (!modalActiveTab) return;
+  const it = curItem();
+  if (!it) return;
+  it.status = parseInt(document.getElementById('input-resp-status').value) || it.status;
+  it.label = document.getElementById('input-resp-label').value.trim();
   const responseText = document.getElementById('input-response').value.trim();
   try {
-    modalResponses[modalActiveTab] = JSON.parse(responseText);
+    it.body = JSON.parse(responseText);
   } catch (e) {
-    modalResponses[modalActiveTab] = responseText;
+    it.body = responseText; // 저장 시 최종 검증
   }
 }
 
-function loadTabContent(status) {
-  const data = modalResponses[status];
-  if (typeof data === 'string') {
-    document.getElementById('input-response').value = data;
-  } else {
-    document.getElementById('input-response').value = JSON.stringify(data, null, 2);
-  }
+function loadTabContent(id) {
+  const it = modalItems.find(x => x.id === id);
+  if (!it) return;
+  document.getElementById('input-resp-status').value = String(it.status);
+  document.getElementById('input-resp-label').value = it.label || '';
+  const data = it.body;
+  document.getElementById('input-response').value =
+    (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
   document.getElementById('json-error').style.display = 'none';
+  updateActiveBtn();
+  if (jsonTreeVisible) buildJsonTree();
 }
 
 function addModalTab() {
   saveCurrentTabContent();
-  const allCodes = ['200', '201', '204', '400', '401', '403', '404', '500'];
-  const used = Object.keys(modalResponses);
-  const available = allCodes.filter(c => !used.includes(c));
-  if (available.length === 0) {
-    showStatus('추가 가능한 상태 코드가 없습니다', true);
-    return;
-  }
-  const labels = available.map(c => STATUS_LABELS[c] || c);
-  const chosen = prompt('추가할 상태 코드를 선택하세요:\n' + available.map((c, i) => `${i + 1}. ${labels[i]}`).join('\n') + '\n\n번호를 입력하세요:');
-  if (!chosen) return;
-  const idx = parseInt(chosen) - 1;
-  const newCode = (idx >= 0 && idx < available.length) ? available[idx] : available[0];
-
-  modalResponses[newCode] = {};
-  modalActiveTab = newCode;
+  const it = { id: newRespId(), status: 200, label: '', body: {} };
+  modalItems.push(it);
+  modalActiveId = it.id;
   renderModalTabs();
-  loadTabContent(newCode);
+  loadTabContent(it.id);
   document.getElementById('input-response').value = '{\n  \n}';
 }
 
-function removeModalTab(status) {
-  if (Object.keys(modalResponses).length <= 1) return;
-  delete modalResponses[status];
-  const remaining = Object.keys(modalResponses);
-  modalActiveTab = remaining[0];
+function removeModalTab(id) {
+  if (modalItems.length <= 1) return;
+  const idx = modalItems.findIndex(it => it.id === id);
+  if (idx < 0) return;
+  modalItems.splice(idx, 1);
+  if (modalActiveResponseId === id) modalActiveResponseId = modalItems[0].id; // 활성 삭제 시 재지정
+  if (modalActiveId === id) modalActiveId = modalItems[Math.max(0, idx - 1)].id;
   renderModalTabs();
-  loadTabContent(modalActiveTab);
+  loadTabContent(modalActiveId);
+}
+
+// 상태코드/설명 변경을 현재 항목과 탭 라벨에 즉시 반영
+function onRespMetaChange() {
+  const it = curItem();
+  if (!it) return;
+  it.status = parseInt(document.getElementById('input-resp-status').value) || 200;
+  it.label = document.getElementById('input-resp-label').value.trim();
+  renderModalTabs();
+}
+
+// 현재 편집 중인 응답을 활성 응답으로 지정
+function setActiveResponse() {
+  if (!modalActiveId) return;
+  modalActiveResponseId = modalActiveId;
+  renderModalTabs();
+  updateActiveBtn();
+  showStatus('활성 응답으로 지정됨');
+}
+
+function updateActiveBtn() {
+  const btn = document.getElementById('btn-set-active');
+  if (!btn) return;
+  const isActive = modalActiveId === modalActiveResponseId;
+  btn.classList.toggle('toggle-on', isActive);
+  btn.textContent = isActive ? '★ 활성 응답' : '☆ 활성으로';
 }
 
 function openAddModal() {
   editingPath = null;
   document.getElementById('modal-title').textContent = 'Route 추가';
+  document.getElementById('input-title').value = '';
+  document.getElementById('input-description').value = '';
+  document.getElementById('input-domain').value = '';
   document.getElementById('input-path').value = '';
   document.getElementById('input-path').disabled = false;
   document.getElementById('input-method').value = 'ALL';
   document.getElementById('input-delay').value = '0';
 
-  modalResponses = { '200': {} };
-  modalActiveTab = '200';
+  const first = { id: newRespId(), status: 200, label: '', body: {} };
+  modalItems = [first];
+  modalActiveId = first.id;
+  modalActiveResponseId = first.id;
   renderModalTabs();
-  loadTabContent('200');
+  loadTabContent(first.id);
   document.getElementById('input-response').value = '{\n  \n}';
 
+  resetJsonTree();
   document.getElementById('json-error').style.display = 'none';
   document.getElementById('modal').classList.add('active');
   document.getElementById('input-path').focus();
@@ -357,26 +576,191 @@ function openAddModal() {
 
 function openEditModal(path) {
   editingPath = path;
-  const { config, responses } = parseRouteFull(routes[path]);
+  const { config, items } = toItems(routes[path]);
 
   document.getElementById('modal-title').textContent = 'Route 수정';
+  document.getElementById('input-title').value = config.title || '';
+  document.getElementById('input-description').value = config.description || '';
+  document.getElementById('input-domain').value = config.domain || '';
   document.getElementById('input-path').value = path;
-  document.getElementById('input-path').disabled = true;
+  document.getElementById('input-path').disabled = false; // path 변경(rename) 허용
   document.getElementById('input-method').value = config.method || 'GET';
   document.getElementById('input-delay').value = config.delay || 0;
 
-  modalResponses = JSON.parse(JSON.stringify(responses)); // deep copy
-  const { status: activeStatus } = getActiveResponse(config, responses);
-  modalActiveTab = activeStatus;
+  modalItems = JSON.parse(JSON.stringify(items)); // deep copy
+  const active = getActiveItem(config, items);
+  modalActiveResponseId = active.id;
+  modalActiveId = active.id;
   renderModalTabs();
-  loadTabContent(modalActiveTab);
+  loadTabContent(modalActiveId);
 
+  resetJsonTree();
   document.getElementById('json-error').style.display = 'none';
   document.getElementById('modal').classList.add('active');
 }
 
 function closeModal() {
   document.getElementById('modal').classList.remove('active');
+  resetJsonTree();
+}
+
+// 현재 탭의 응답 JSON 을 들여쓰기 2칸으로 보기 좋게 정렬
+function formatResponse() {
+  const el = document.getElementById('input-response');
+  const text = el.value.trim();
+  if (!text) return;
+  try {
+    el.value = JSON.stringify(JSON.parse(text), null, 2);
+    document.getElementById('json-error').style.display = 'none';
+    if (jsonTreeVisible) buildJsonTree();
+  } catch (e) {
+    const errEl = document.getElementById('json-error');
+    errEl.style.display = 'block';
+    showStatus('JSON 형식이 올바르지 않아 정렬할 수 없습니다', true);
+  }
+}
+
+// --- JSON 트리 탐색 ---
+
+function resetJsonTree() {
+  jsonTreeVisible = false;
+  const treeEl = document.getElementById('json-tree');
+  if (treeEl) treeEl.classList.remove('active');
+  const btn = document.getElementById('btn-tree');
+  if (btn) btn.classList.remove('toggle-on');
+}
+
+function toggleJsonTree() {
+  const treeEl = document.getElementById('json-tree');
+  const btn = document.getElementById('btn-tree');
+  if (jsonTreeVisible) {
+    jsonTreeVisible = false;
+    treeEl.classList.remove('active');
+    btn.classList.remove('toggle-on');
+  } else {
+    if (!buildJsonTree()) return; // 유효한 JSON 이 아니면 켜지 않음
+    jsonTreeVisible = true;
+    treeEl.classList.add('active');
+    btn.classList.add('toggle-on');
+  }
+}
+
+// 현재 textarea 의 JSON 을 정규화한 뒤, 객체/배열 컨테이너 계층을 접을 수 있는 트리로 구성한다.
+function buildJsonTree() {
+  const ta = document.getElementById('input-response');
+  let parsed;
+  try {
+    parsed = JSON.parse(ta.value);
+  } catch (e) {
+    showStatus('유효한 JSON 일 때만 트리를 표시할 수 있습니다', true);
+    return false;
+  }
+  const normalized = JSON.stringify(parsed, null, 2);
+  ta.value = normalized; // 라인 매핑 정확도를 위해 2칸 들여쓰기로 정규화
+  const lines = normalized.split('\n');
+
+  const root = { children: [] };
+  jsonTreeNodes = [];
+  const stack = [{ node: root, type: 'root', headerDepth: -1, idx: 0 }];
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    const indentLen = raw.length - raw.replace(/^ +/, '').length;
+    const depth = indentLen / 2;
+    const firstCh = trimmed[0];
+    if (firstCh === '}' || firstCh === ']') { if (stack.length > 1) stack.pop(); continue; }
+
+    // 부모가 배열이고 이 라인이 그 직계 요소이면 인덱스를 매긴다.
+    let arrIdx = null;
+    const parent = stack[stack.length - 1];
+    const keyMatch = raw.match(/^\s*"((?:[^"\\]|\\.)*)"\s*:\s*(.*)$/);
+    if (parent && parent.type === 'array' && depth === parent.headerDepth + 1) {
+      arrIdx = parent.idx;
+      parent.idx++;
+    }
+
+    let label = null, kind = null;
+    if (keyMatch) {
+      const rest = keyMatch[2];
+      if (rest === '{') kind = 'object';
+      else if (rest === '[') kind = 'array';
+      label = keyMatch[1];
+    } else {
+      if (trimmed === '{') kind = 'object';
+      else if (trimmed === '[') kind = 'array';
+      label = (arrIdx !== null) ? `[${arrIdx}]` : null;
+    }
+    if (kind) {
+      if (label !== null) {
+        const node = { id: jsonTreeNodes.length, label, kind, line: i, children: [], collapsed: true };
+        jsonTreeNodes.push(node);
+        parent.node.children.push(node);
+        stack.push({ node, type: kind, headerDepth: depth, idx: 0 });
+      } else {
+        // 최상위 래퍼 등 라벨 없는 컨테이너: 트리에 넣지 않고 부모 노드를 그대로 물려준다
+        stack.push({ node: parent.node, type: kind, headerDepth: depth, idx: 0 });
+      }
+    }
+  }
+  jsonTreeRoot = root;
+  renderTree();
+  return true;
+}
+
+// 트리를 현재 collapsed 상태에 맞춰 다시 그린다. (기본은 모두 접힘 → 최상위만 보임)
+function renderTree() {
+  const treeEl = document.getElementById('json-tree');
+  if (!jsonTreeRoot || jsonTreeRoot.children.length === 0) {
+    treeEl.innerHTML = '<div class="json-tree-empty">표시할 계층이 없습니다.</div>';
+    return;
+  }
+  const html = [];
+  const walk = (nodes, depth) => {
+    for (const node of nodes) {
+      const hasKids = node.children.length > 0;
+      const pad = 6 + depth * 14;
+      const kindMark = node.kind === 'array' ? '[ ]' : '{ }';
+      const arrow = hasKids ? (node.collapsed ? '▶' : '▼') : '';
+      html.push(
+        `<div class="json-tree-item" style="padding-left:${pad}px" onclick="onTreeItemClick(${node.id})" title="${escapeAttr(node.label)}">` +
+        `<span class="jt-arrow">${arrow}</span>` +
+        `<span class="jt-label">${escapeHtml(node.label)}</span>` +
+        `<span class="jt-kind">${kindMark}</span>` +
+        `</div>`
+      );
+      if (hasKids && !node.collapsed) walk(node.children, depth + 1);
+    }
+  };
+  walk(jsonTreeRoot.children, 0);
+  treeEl.innerHTML = html.join('');
+}
+
+// 트리 항목 클릭: 자식이 있으면 접기/펼치기 토글, 그리고 해당 라인으로 이동
+function onTreeItemClick(id) {
+  const node = jsonTreeNodes[id];
+  if (!node) return;
+  if (node.children.length > 0) { node.collapsed = !node.collapsed; renderTree(); }
+  jumpToLine(node.line);
+}
+
+// 트리 항목 클릭 시 textarea 의 해당 라인으로 스크롤 + 선택 강조
+function jumpToLine(lineIdx) {
+  const ta = document.getElementById('input-response');
+  const lines = ta.value.split('\n');
+  if (lineIdx < 0 || lineIdx >= lines.length) return;
+  let start = 0;
+  for (let i = 0; i < lineIdx; i++) start += lines[i].length + 1;
+  const end = start + lines[lineIdx].length;
+  const style = getComputedStyle(ta);
+  let lh = parseFloat(style.lineHeight);
+  if (isNaN(lh)) lh = (parseFloat(style.fontSize) || 13) * 1.5;
+  const padTop = parseFloat(style.paddingTop) || 0;
+  ta.focus();
+  ta.setSelectionRange(start, end);
+  // textarea 는 wrap=off 이라 한 줄 = lh 고정. 선택한 라인을 편집창 세로 중앙으로.
+  ta.scrollTop = Math.max(0, padTop + lineIdx * lh - ta.clientHeight / 2 + lh / 2);
+  ta.scrollLeft = 0; // 라인 시작(키)이 보이도록 가로 위치 초기화
 }
 
 async function saveRoute() {
@@ -384,36 +768,50 @@ async function saveRoute() {
     saveCurrentTabContent();
 
     const path = document.getElementById('input-path').value.trim();
+    const title = document.getElementById('input-title').value.trim();
+    const description = document.getElementById('input-description').value.trim();
+    let domain = document.getElementById('input-domain').value.trim();
+    if (!domain) domain = guessDomain(path);   // 미입력 시 path 에서 도메인 추출
     const method = document.getElementById('input-method').value;
     const delay = parseInt(document.getElementById('input-delay').value) || 0;
 
     if (!path) { document.getElementById('input-path').focus(); return; }
 
-    // 모든 응답이 유효한 JSON인지 검증
-    const validatedResponses = {};
-    for (const [status, data] of Object.entries(modalResponses)) {
-      if (typeof data === 'string') {
+    // path 변경(rename) 시: 대상 path 가 이미 다른 route 로 존재하면 덮어쓰기 확인
+    if (editingPath && path !== editingPath && routes[path]) {
+      if (!confirm(`"${path}" route가 이미 존재합니다. 덮어쓰시겠습니까?`)) return;
+    }
+
+    // 모든 응답 body 가 유효한 JSON인지 검증
+    const responses = [];
+    for (const it of modalItems) {
+      let respBody = it.body;
+      if (typeof respBody === 'string') {
         try {
-          validatedResponses[status] = JSON.parse(data);
+          respBody = JSON.parse(respBody);
         } catch (e) {
-          modalActiveTab = status;
+          modalActiveId = it.id;
           renderModalTabs();
-          loadTabContent(status);
+          loadTabContent(it.id);
           const errEl = document.getElementById('json-error');
           errEl.style.display = 'block';
           errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
           return;
         }
-      } else {
-        validatedResponses[status] = data;
       }
+      responses.push({ id: it.id, status: it.status, label: it.label || '', body: respBody });
     }
 
     document.getElementById('json-error').style.display = 'none';
 
-    const activeStatus = parseInt(modalActiveTab) || 200;
-    const config = { method, delay, active_status: activeStatus };
-    const body = { path, responses: validatedResponses, config };
+    const activeId = modalActiveResponseId || (modalItems[0] && modalItems[0].id);
+    const config = { method, delay, active_id: activeId };
+    if (title) config.title = title;
+    if (description) config.description = description;
+    if (domain) config.domain = domain;
+    const body = { path, responses, config };
+    // 수정 중 path 가 바뀌었으면 기존 키를 함께 보내 서버가 원자적으로 rename 하도록 함
+    if (editingPath && path !== editingPath) body.old_path = editingPath;
 
     const res = await fetch(API, {
       method: 'POST',
