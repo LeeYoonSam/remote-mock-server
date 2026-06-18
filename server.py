@@ -34,46 +34,72 @@ def update_routes(fn):
         os.replace(tmp, ROUTES_FILE)
         return result
 
-def parse_route(route_data):
-    """route 데이터에서 config와 active response를 분리. 하위 호환 지원."""
-    if isinstance(route_data, dict) and "__mock_config__" in route_data:
-        config = route_data["__mock_config__"]
-        # 새 포맷: 복수 responses
-        if "__mock_responses__" in route_data:
-            responses = route_data["__mock_responses__"]
-            active_status = str(config.get("active_status", 200))
-            if active_status in responses:
-                response = responses[active_status]
-            elif "200" in responses:
-                response = responses["200"]
-                active_status = "200"
-            elif responses:
-                active_status = next(iter(responses))
-                response = responses[active_status]
-            else:
-                response = {}
-                active_status = "200"
-            config["status"] = int(active_status)
-            return config, response
-        # 기존 포맷: 단수 response
-        response = route_data.get("__mock_response__", {})
-        return config, response
-    # 레거시 포맷: 전체가 response
-    return {"method": "ALL", "status": 200, "delay": 0}, route_data
+def _to_items(route_data):
+    """route 데이터를 (config, items) 로 정규화. items: [{id, status, label, body}].
 
-
-def parse_route_full(route_data):
-    """route 데이터에서 config와 전체 responses dict를 반환. Admin API용."""
+    하위 호환:
+    - __mock_responses__ 가 list 면 그대로(새 포맷, 같은 status 다중 응답 + label 지원).
+    - __mock_responses__ 가 dict({status: body}) 면 각 status 를 한 항목으로 변환.
+    - __mock_response__ 단수 / 레거시(전체가 body) 도 한 항목으로 변환.
+    """
     if isinstance(route_data, dict) and "__mock_config__" in route_data:
         config = dict(route_data["__mock_config__"])
         if "__mock_responses__" in route_data:
-            return config, route_data["__mock_responses__"]
-        # 단수 → 복수 변환
-        status = str(config.get("status", 200))
-        response = route_data.get("__mock_response__", {})
-        return config, {status: response}
-    # 레거시 포맷
-    return {"method": "ALL", "delay": 0, "active_status": 200}, {"200": route_data}
+            resp = route_data["__mock_responses__"]
+            if isinstance(resp, list):
+                items = []
+                for r in resp:
+                    st = int(r.get("status", 200))
+                    items.append({
+                        "id": str(r.get("id", st)),
+                        "status": st,
+                        "label": r.get("label", ""),
+                        "body": r.get("body", {}),
+                    })
+            else:  # 기존 dict { status: body }
+                items = [{"id": str(k), "status": int(k), "label": "", "body": v}
+                         for k, v in resp.items()]
+        elif "__mock_response__" in route_data:
+            st = int(config.get("status", 200))
+            items = [{"id": str(st), "status": st, "label": "", "body": route_data["__mock_response__"]}]
+        else:
+            items = []
+        if not items:
+            items = [{"id": "200", "status": 200, "label": "", "body": {}}]
+        return config, items
+    # 레거시 포맷: 전체가 response
+    return {"method": "ALL", "delay": 0}, [{"id": "200", "status": 200, "label": "", "body": route_data}]
+
+
+def _pick_active(config, items):
+    """config 기준으로 활성 응답 항목을 고른다. (active_id → active_status → status → 첫 항목)"""
+    if not items:
+        return {"id": "200", "status": 200, "label": "", "body": {}}
+    active_id = config.get("active_id")
+    if active_id is not None:
+        for it in items:
+            if it["id"] == str(active_id):
+                return it
+    for key in ("active_status", "status"):
+        val = config.get(key)
+        if val is not None:
+            for it in items:
+                if it["status"] == int(val):
+                    return it
+    return items[0]
+
+
+def parse_route(route_data):
+    """route 데이터에서 config와 활성 응답 body를 분리. 하위 호환 지원."""
+    config, items = _to_items(route_data)
+    active = _pick_active(config, items)
+    config["status"] = active["status"]
+    return config, active["body"]
+
+
+def parse_route_full(route_data):
+    """route 데이터에서 config와 전체 응답 항목 리스트를 반환. Admin/출력용."""
+    return _to_items(route_data)
 
 
 def _path_segments(p):
@@ -175,30 +201,39 @@ class MockHandler(BaseHTTPRequestHandler):
                 data = json.loads(self.read_body())
                 route_path = data["path"]
                 config = data.get("config", {})
+                old_path = data.get("old_path")
 
                 def apply_add(routes):
                     if "responses" in data:
-                        routes[route_path] = {
+                        new_entry = {
                             "__mock_config__": config,
                             "__mock_responses__": data["responses"]
                         }
                     elif "response" in data:
                         if config:
-                            routes[route_path] = {
+                            new_entry = {
                                 "__mock_config__": config,
                                 "__mock_response__": data["response"]
                             }
                         else:
-                            routes[route_path] = data["response"]
+                            new_entry = data["response"]
                     else:
                         return "response or responses required"
+                    # path rename: 기존 키를 제거한 뒤 새 키로 등록한다.
+                    # (route_path 가 신규 키이면 dict 끝에 추가되어 "최신 등록순"에서 맨 위로 온다)
+                    if old_path and old_path != route_path and old_path in routes:
+                        del routes[old_path]
+                    routes[route_path] = new_entry
                     return None
 
                 err = update_routes(apply_add)
                 if err:
                     self.send_json(400, {"error": err})
                     return
-                print(f"[ADMIN] Route 추가/수정: {route_path}")
+                if old_path and old_path != route_path:
+                    print(f"[ADMIN] Route rename: {old_path} -> {route_path}")
+                else:
+                    print(f"[ADMIN] Route 추가/수정: {route_path}")
                 self.send_json(200, {"success": True, "path": route_path})
             except (json.JSONDecodeError, KeyError) as e:
                 self.send_json(400, {"error": str(e)})
@@ -309,11 +344,15 @@ if __name__ == "__main__":
     print(f"Admin page: http://localhost:{port}/_admin")
     print(f"\nRegistered routes ({len(routes)}):")
     for path in routes:
-        config, responses = parse_route_full(routes[path])
+        config, items = parse_route_full(routes[path])
         method = config.get("method", "ALL")
-        active = config.get("active_status", list(responses.keys())[0] if responses else 200)
-        statuses = ", ".join(responses.keys())
-        print(f"  [{method}] {path} -> active:{active} ({statuses})")
+        active = _pick_active(config, items)
+        statuses = ", ".join(
+            f"{it['status']}" + (f"·{it['label']}" if it['label'] else "") for it in items
+        )
+        title = config.get("title", "")
+        label = f" — {title}" if title else ""
+        print(f"  [{method}] {path}{label} -> active:{active['status']} ({statuses})")
     print(f"\nroutes.json 수정 시 서버 재시작 불필요 (hot reload)")
     print("Press Ctrl+C to stop\n")
     server.serve_forever()
