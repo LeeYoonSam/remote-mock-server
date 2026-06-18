@@ -43,29 +43,46 @@ python3 server.py
 ### Route 등록
 
 1. **+ Route 추가** 버튼 클릭
-2. Path 입력 (예: `/api/example/users`)
-3. HTTP Method 선택 (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `ALL`)
-4. Delay 설정 (응답 지연, 밀리초)
-5. 상태별 응답 등록:
+2. **이름 / 설명** 입력 (선택) — 어떤 라우트인지 한눈에 식별하기 위한 메모. 카드 상단에 **이름 → 설명 → 경로** 순으로 표시됩니다.
+3. **도메인** 입력 (선택) — route를 분류하는 라벨. 목록 상단의 필터로 사용됩니다. 기존에 쓰던 값은 자동완성으로 추천되며, **비워두면 Path에서 자동으로 추출**합니다 (예: `/api/v5/me/trial-campaign-apply` → `trial-campaign-apply`. `api`·`v5`·`me` 같은 공통 세그먼트와 `{param}`은 건너뜁니다).
+4. Path 입력 (예: `/api/example/users`)
+5. HTTP Method 선택 (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `ALL`)
+6. Delay 설정 (응답 지연, 밀리초)
+7. 상태별 응답 등록:
    - 기본 탭(200)에 Response Body를 JSON으로 입력
-   - **+ 상태 추가** 버튼으로 다른 상태 코드(400, 500 등)의 응답도 등록
-   - 탭을 클릭하여 각 상태별 응답을 편집
-6. **저장** 클릭
+   - **+ 상태 추가** 버튼으로 응답 케이스를 추가. **같은 상태코드도 여러 개** 만들 수 있어, 200이라도 "정상 / 빈 목록 / VIP" 처럼 케이스별로 대비해둘 수 있습니다
+   - 각 응답마다 **상태코드 선택**과 **설명**(예: `빈 목록`, `VIP 사용자`)을 입력 — 탭과 카드 배지에 표시됩니다
+   - **☆ 활성으로** 버튼으로 어떤 응답을 활성으로 내보낼지 지정 (탭에 ★ 표시)
+   - 응답 패널의 **⤵ 정렬** 버튼으로 JSON을 들여쓰기 2칸으로 보기 좋게 정리 (한 줄로 붙여넣은 응답을 다듬을 때 유용)
+   - **⌗ 트리** 버튼으로 JSON 계층(객체·배열) 트리를 열고, 항목을 클릭하면 **접기/펼치기**(기본 모두 접힘)와 함께 편집창의 해당 위치로 이동 (큰 응답을 탐색할 때 유용)
+8. **저장** 클릭
 
-### 상태별 응답 전환 (활성 상태)
+> route 목록은 **최신 등록순**(마지막에 추가·수정한 route가 맨 위)으로 정렬됩니다.
 
-하나의 route에 여러 상태 코드별 응답을 등록해두고, 활성 상태를 전환하여 빠르게 테스트할 수 있습니다.
+### Route 검색 / 필터
 
-- route 카드에 등록된 상태 코드가 배지로 표시됩니다
-- **활성 상태 배지**는 파란색 테두리로 강조됩니다
-- 비활성 배지를 **클릭**하면 즉시 활성 상태가 전환됩니다
-- 서버는 현재 활성 상태의 응답과 상태 코드를 반환합니다
+목록 상단의 필터 바로 원하는 route를 빠르게 찾습니다.
 
-예시: `/api/example/users`에 200(정상)과 500(서버 에러) 응답을 등록해두면, 배지 클릭만으로 정상/에러 응답을 전환할 수 있습니다.
+- **검색창**: 이름·경로·설명에 포함된 텍스트로 실시간 필터
+- **이름 드롭다운**: 등록된 이름으로 필터. 여러 route에 **같은 이름**을 붙이면 카테고리처럼 그룹 단위로 묶어서 볼 수 있습니다 (이름 입력칸은 기존 이름을 자동완성으로 추천)
+- **도메인 드롭다운**: 등록된 도메인으로 필터
+- 세 조건은 **AND로 결합**되고, 우측에 `현재 / 전체` 개수가 표시됩니다
+
+### 상태별 응답 전환 (활성 응답)
+
+하나의 route에 여러 응답 케이스를 등록해두고, 활성 응답을 전환하여 빠르게 테스트할 수 있습니다.
+
+- route 카드에 등록된 각 응답이 배지로 표시됩니다 (설명이 있으면 `200 · 빈 목록` 처럼 함께 표시)
+- **활성 응답 배지**는 파란색 테두리로 강조됩니다
+- 다른 배지를 **클릭**하면 즉시 활성 응답이 전환됩니다
+- 서버는 현재 활성 응답의 body와 상태 코드를 반환합니다
+
+예시: `/api/example/users`에 `200 · 정상`, `200 · 빈 목록`, `500 · 서버 에러`를 등록해두면, 배지 클릭만으로 케이스를 전환할 수 있습니다.
 
 ### Route 수정 / 삭제
 
-- 각 route 카드의 **수정** 버튼으로 응답 내용 변경 (상태별 탭 편집 가능)
+- 각 route 카드의 **수정** 버튼으로 이름·설명·응답 내용 변경 (상태별 탭 편집 가능)
+- **Path 변경(rename) 가능**: 수정 화면에서 Path를 바꿔 저장하면 기존 키를 지우고 새 Path로 옮깁니다(고아 route가 남지 않음). 바꾸려는 Path가 이미 다른 route로 존재하면 덮어쓰기 여부를 확인합니다.
 - **삭제** 버튼으로 route 제거
 
 ### Hot Reload
@@ -84,50 +101,53 @@ curl http://localhost:8080/_api/routes
 
 ### Route 추가/수정 (상태별 응답)
 
+`responses`는 응답 케이스 배열입니다. 각 항목은 `id`(고유), `status`, `label`(설명), `body`를 가지며 **같은 상태코드를 여러 개** 둘 수 있습니다. `config.active_id`로 활성 응답을 지정합니다.
+
 ```bash
 curl -X POST http://localhost:8080/_api/routes \
   -H "Content-Type: application/json" \
   -d '{
     "path": "/api/example/users",
-    "responses": {
-      "200": {"id": 1, "name": "홍길동"},
-      "400": {"error": "잘못된 요청"},
-      "500": {"error": "서버 오류"}
-    },
-    "config": {
-      "method": "GET",
-      "delay": 0,
-      "active_status": 200
-    }
+    "responses": [
+      {"id": "ok",    "status": 200, "label": "정상",   "body": {"id": 1, "name": "홍길동"}},
+      {"id": "empty", "status": 200, "label": "빈 목록", "body": {"users": []}},
+      {"id": "err",   "status": 500, "label": "서버 오류", "body": {"error": "..."}}
+    ],
+    "config": {"method": "GET", "delay": 0, "active_id": "empty"}
   }'
 ```
 
-### Route 추가/수정 (단일 응답, 기존 호환)
+> **하위 호환**: `responses`를 `{ "200": {...}, "500": {...} }` 형태의 객체로 보내거나, 단일 응답(`"response": {...}` + `config.status`)으로 보내도 그대로 동작합니다. 활성 선택은 `active_id` → `active_status` → `status` 순으로 적용됩니다.
+
+### 활성 응답 전환
+
+동일한 route를 다시 POST하면서 `active_id`만 변경합니다:
 
 ```bash
 curl -X POST http://localhost:8080/_api/routes \
   -H "Content-Type: application/json" \
   -d '{
     "path": "/api/example/users",
-    "response": {"id": 1, "name": "홍길동"},
-    "config": {"method": "GET", "status": 200, "delay": 0}
+    "responses": [
+      {"id": "ok",  "status": 200, "label": "정상",   "body": {"id": 1, "name": "홍길동"}},
+      {"id": "err", "status": 500, "label": "서버 오류", "body": {"error": "..."}}
+    ],
+    "config": {"method": "GET", "delay": 0, "active_id": "err"}
   }'
 ```
 
-### 활성 상태 전환
+### Route 이름 변경 (path rename)
 
-동일한 route를 다시 POST하면서 `active_status`만 변경합니다:
+`old_path`에 기존 path, `path`에 새 path를 함께 보내면 기존 키를 지우고 새 키로 옮깁니다(고아 route 방지). 하나의 요청 안에서 원자적으로 처리됩니다.
 
 ```bash
 curl -X POST http://localhost:8080/_api/routes \
   -H "Content-Type: application/json" \
   -d '{
-    "path": "/api/example/users",
-    "responses": {
-      "200": {"id": 1, "name": "홍길동"},
-      "500": {"error": "서버 오류"}
-    },
-    "config": {"method": "GET", "delay": 0, "active_status": 500}
+    "old_path": "/api/example/users",
+    "path": "/api/example/members",
+    "responses": [{"id": "ok", "status": 200, "label": "정상", "body": {"id": 1, "name": "홍길동"}}],
+    "config": {"method": "GET", "delay": 0, "active_id": "ok"}
   }'
 ```
 
@@ -145,10 +165,14 @@ curl -X DELETE http://localhost:8080/_api/routes \
 |------|------|--------|
 | `method` | 허용할 HTTP 메서드 (`GET`, `POST`, `ALL` 등) | `ALL` |
 | `delay` | 응답 지연 시간 (밀리초) | `0` |
-| `active_status` | 현재 활성 상태 코드 (서버가 반환할 응답) | 첫 번째 등록 상태 |
+| `active_id` | 현재 활성 응답의 `id` (서버가 반환할 응답) | 첫 번째 응답 |
+| `active_status` | (하위 호환) 활성 상태 코드. `active_id`가 없을 때 사용 | — |
+| `title` | route 식별용 이름 (Admin 카드 상단에 표시, mock 응답에는 미포함) | (없음) |
+| `description` | route 설명 메모 (Admin 카드에 표시) | (없음) |
+| `domain` | 분류 라벨 (Admin 필터 사용. 미입력 시 Path에서 자동 추출) | (없음) |
 
 - 메서드가 일치하지 않으면 `405 Method Not Allowed`를 반환합니다
-- `active_status` fallback 순서: 지정값 → 200 → 첫 번째 등록 상태
+- 활성 응답 선택 순서: `active_id` → `active_status` → `status` → 첫 번째 응답
 
 ## Path 파라미터 매칭
 
@@ -262,25 +286,41 @@ curl http://localhost:8080/api/example/users
     "__mock_config__": {
       "method": "GET",
       "delay": 0,
-      "active_status": 200
+      "active_id": "default",
+      "title": "사용자 목록 조회",
+      "description": "마이페이지 상단 사용자 정보 영역",
+      "domain": "user"
     },
-    "__mock_responses__": {
-      "200": {
-        "users": [
-          {"id": 1, "name": "홍길동"},
-          {"id": 2, "name": "김철수"}
-        ]
+    "__mock_responses__": [
+      {
+        "id": "default",
+        "status": 200,
+        "label": "정상",
+        "body": {
+          "users": [
+            {"id": 1, "name": "홍길동"},
+            {"id": 2, "name": "김철수"}
+          ]
+        }
       },
-      "400": {
-        "error": "잘못된 요청"
+      {
+        "id": "empty",
+        "status": 200,
+        "label": "빈 목록",
+        "body": {"users": []}
       },
-      "500": {
-        "error": "Internal Server Error"
+      {
+        "id": "server_error",
+        "status": 500,
+        "label": "서버 오류",
+        "body": {"error": "Internal Server Error"}
       }
-    }
+    ]
   }
 }
 ```
+
+> `__mock_responses__`는 응답 케이스 배열이며 같은 `status`를 여러 개 둘 수 있습니다. 기존 `{ "200": {...} }` 객체 형태도 그대로 읽힙니다(하위 호환).
 
 ## 요구사항
 
